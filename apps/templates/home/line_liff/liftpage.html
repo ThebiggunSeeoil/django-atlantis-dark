@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>    
+    <script>
+        async function getUserProfile() {
+            const profile = await liff.getProfile()
+            var user_id = profile.userId
+            document.write(user_id)
+            window.location.href = "{% url 'liffmainpage' 'xxxxxxxxxx' %}".replace(/xxxxxxxxxx/,user_id)
+            
+
+        }
+        async function main () {
+            await liff.init({ liffId: "1657079369-ANXOzLxl" , withLoginOnExternalBrowser: true})
+            if (liff.isLoggedIn()){
+
+                getUserProfile()
+            }
+        }
+        main()
+    </script>
+
+</body>
+
+</html>

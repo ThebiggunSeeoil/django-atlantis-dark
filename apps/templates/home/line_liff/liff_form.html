@@ -1,0 +1,72 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} UI Forms {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+	<div class="content">
+		<div class="page-inner">
+			
+			<div class="row">
+				<div class="col-md-12">
+					<div class="card">
+						<div class="card-header">
+							<div class="card-title">ลงทะเบียนเข้าใช้งาน SUSCO BOT</div>
+						</div>
+						<div class="card-body">
+							<div class="row">
+								<div class="col-md-6 col-lg-4">
+
+                                    <div class="form-group">
+										<label for="largeInput">ชื่อ - นามสกุล</label>
+										<input type="text" class="form-control form-control" id="defaultInput" placeholder="Default Input">
+									</div>
+									<div class="form-group">
+										<label for="email2">Email Address</label>
+										<input type="email" class="form-control" id="email2" placeholder="Enter Email">
+									</div>
+									<div class="form-group">
+										<label for="exampleFormControlSelect1">ระบุตำแหน่งผู้ใช้งาน</label>
+										<select class="form-control" id="exampleFormControlSelect1">
+											<option value="">ผู้จัดการสาขา</option>
+											<option value="">ผู้ช่วยผู้จัดการ</option>
+											<option value="">ผู้จัดการเขต</option>
+											<option value="">ผู้จัดการภาค</option>
+											<option value="">ส่วนผู้จัดการระบบ</option>
+										</select>
+									</div>
+									<div class="form-group has-success">
+										<label for="successInput">LineUserID</label>
+										<input type="text" id="userId" value="{{user_id}}" class="form-control" readonly >
+									</div>
+                                    <div class="form-group has-success">
+										<label for="successInput">LineNameProfile</label>
+										<input type="text" id="userNameProfile" value="{{display_name}}" class="form-control" readonly>
+									</div>
+									
+								</div>
+								
+							</div>
+						</div>
+						<div class="card-action">
+							<button class="btn btn-success">Submit</button>
+							<button class="btn btn-danger">Cancel</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+	<!-- Atlantis DEMO methods, don't include it in your project! -->
+	<script src="/static/assets/js/setting-demo2.js"></script>
+
+{% endblock javascripts %}	
