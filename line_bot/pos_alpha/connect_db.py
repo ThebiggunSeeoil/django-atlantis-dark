@@ -53,7 +53,7 @@ class ConnectDBAlphaPOS :
         
     def Connect_SQL_SERVER (self,sql_command,valible,type_sql,command) :
         # pass
-        valible = '2022-06-03'
+        # valible = '2022-06-03'
         try:
             conn = pymssql.connect(server=self.station_IP, user=self.station_USER, password=self.station_PASSWORD, database=self.station_DB,timeout=time_out)
             cursor = conn.cursor(as_dict=True)
