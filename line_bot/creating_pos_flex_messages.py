@@ -90,9 +90,15 @@ class CreateReportPOS:
             # ติดปัญหา กรณี สาขา ที่ยังไม่มี ผจก ลงทะเบียนมา
             self.manager_detail = UserListCodeType.objects.filter(userList_station_name__station_site=self.station_pbl,userList_position=1).first()
             self.area_detail = UserListCodeType.objects.filter(userList_area_name__id=self.station_area_id,userList_position=3).first()
-            self.manager_name = self.manager_detail.userList_display_name
-            self.manager_user_list_id = self.manager_detail.id
-            self.manager_line_user_id = self.manager_detail.userList_userid
+            try :
+                self.manager_name = self.manager_detail.userList_display_name
+                self.manager_user_list_id = self.manager_detail.id
+                self.manager_line_user_id = self.manager_detail.userList_userid
+            except :
+                self.manager_name = 'None'
+                self.manager_user_list_id = 0
+                self.manager_line_user_id = 'None'
+
             self.area_name = self.area_detail.userList_display_name
             self.area_user_list_id = self.area_detail.id
             self.area_line_user_id = self.area_detail.userList_userid

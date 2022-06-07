@@ -1143,10 +1143,16 @@ def callback(request):
                             print ('ไม่พบสถานีที่ต้องการลงทะเบียน')
                             flexmessages = FlexMessages().ConfirmStationFailed()
                             SendFlexMessages(payload).ReplyMessage(reply_token,flexmessages)
+                        
                         else :
-                            print ('รายชื่อสาขาที่ทำการลงทะเบียน คือ {}'.format(station_list))
-                            flexmessages = FlexMessages().ConfirmedAddMoreStationPass(station_list)
-                            SendFlexMessages(payload).ReplyMessage(reply_token,flexmessages)
+                            if station_list.station_activate == True :
+                                print ('รายชื่อสาขาที่ทำการลงทะเบียน คือ {}'.format(station_list))
+                                flexmessages = FlexMessages().ConfirmedAddMoreStationPass(station_list)
+                                SendFlexMessages(payload).ReplyMessage(reply_token,flexmessages)
+                            elif station_list.station_activate == False :
+                                print ('สถานีนี้ถูกปิดการใช้งาน')
+                                text_message = 'สถานี {}  ยังไม่่ได้เปิดใช้งาน กรุณาติดต่อผู้ดูแลระบบ'.format(station_list.station_name)
+                                line_bot_api.reply_message(reply_token, TextSendMessage(text=text_message)) 
                     elif 'admin' in text_message :
                         command_code = text_message[5:]
                         command_admin_register = ['123456789']

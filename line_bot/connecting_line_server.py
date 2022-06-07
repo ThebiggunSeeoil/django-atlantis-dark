@@ -17,8 +17,12 @@ class SendFlexMessages :
         self.reply_token = payload['events'][0]['replyToken']
         self.user_id_line = UserListCodeType.objects.filter(userList_userid=self.line_user_id).first()
         self.display_name = self.user_id_line.userList_display_name
-        self.position = self.user_id_line.userList_position.position_name
-        self.postion_id = self.user_id_line.userList_position.id
+        try :
+            self.position = self.user_id_line.userList_position.position_name
+            self.postion_id = self.user_id_line.userList_position.id
+        except :
+            self.position = 'None'
+            self.postion_id = 0
         if self.postion_id == 1 :
             self.station_name = self.user_id_line.userList_station_name.station_name
         elif self.postion_id in (3,4,5) :
