@@ -217,18 +217,32 @@ def callback(request):
                         manager_user_id2 = UserListCodeType.objects.filter(id=manager_id).first()
                         manager_user_id3 = UserListCodeType.objects.filter(id=manager_id).all()
                         print ('main manager_id_approved : {}'.format(manager_id))
-                        # ส่ง line notify แจ้งเตือนสถานะ ได้รับการอนุมัติจาก admin แล้ว
-                        creating_line_data().get_approve_new_main_area_manager(manager_user_id2,line_token)
-                        # ส่ง Flex message ส่งไปให้ผู้จัดการเขตรับทราบ Admin approved แล้ว
-                        flexmessages = FlexMessages().AdminApprovedNewMainAreaManager(manager_user_id2)
-                        # ค้นหา area manager user id เพื่อส่งการแจ้งเตือน ได้รับอนุมัติจาก Admin แล้ว 
-                        SendFlexMessages(payload).PushMessageAdminApprovedNewAreaManager(flexmessages,manager_user_id3)
+                        
+                        
+                        # Query to check last status approve if approved reply another already approved or inapprove go to below process 
+                        if manager_user_id2.userList_activate == False and manager_user_id3.userList_approved_datetime == None : 
+                            # ส่ง line notify แจ้งเตือนสถานะ ได้รับการอนุมัติจาก admin แล้ว
+                            creating_line_data().get_approve_new_main_area_manager(manager_user_id2,line_token)
+                            # ส่ง Flex message ส่งไปให้ผู้จัดการเขตรับทราบ Admin approved แล้ว
+                            flexmessages = FlexMessages().AdminApprovedNewMainAreaManager(manager_user_id2)
+                            # ค้นหา area manager user id เพื่อส่งการแจ้งเตือน ได้รับอนุมัติจาก Admin แล้ว 
+                            
+                            
+                            SendFlexMessages(payload).PushMessageAdminApprovedNewAreaManager(flexmessages,manager_user_id3)
 
-                        # ส่งไป update db table UserListCodeType set update userList_member_mode='approved',userList_approved_datetime=datetime.now(),userList_activate=True
-                        SaveDB().update_position_approve(manager_user_id2)
-                        # send reply message แจ้งการอนุมัติจาก admin แล้ว
-                        message = 'ทำรายการอนุมัติ ตำแหน่งผู้จัดการภาค ให้กับคุณ {} เรียบร้อยแล้ว'.format(manager_user_id2.userList_display_name)
-                        line_bot_api.reply_message(reply_token, TextSendMessage(text=message))
+                            # ส่งไป update db table UserListCodeType set update userList_member_mode='approved',userList_approved_datetime=datetime.now(),userList_activate=True
+                            SaveDB().update_position_approve(manager_user_id2)
+                            # send reply message แจ้งการอนุมัติจาก admin แล้ว
+                            message = 'ทำรายการอนุมัติ ตำแหน่งผู้จัดการภาค ให้กับคุณ {} เรียบร้อยแล้ว'.format(manager_user_id2.userList_display_name)
+                            line_bot_api.reply_message(reply_token, TextSendMessage(text=message))
+                        else :
+                            try :
+                                date_approve = manager_user_id3.userList_approved_datetime.strftime("%d-%m-%Y %H:%M")
+                            except :
+                                date_approve = 'พบปัญหาในการค้นหาเวลาอนุมัติ'
+                            message = 'ตำแหน่งผู้จัดการภาค ของคุณ {} ได้รับการอนุมัติแล้วเมื่อ {}'.format(manager_user_id2.userList_display_name,date_approve)
+                            line_bot_api.reply_message(reply_token, TextSendMessage(text=message))
+                            pass
                     elif 'REJECT' in command :
                         data_command = 'MAIN-AREA-REGISTER-PROCESS-REJECT-ID'
                         manager_id = (command[command.index(data_command) + len(data_command): command.index('END'):])
