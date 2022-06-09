@@ -118,26 +118,30 @@ def callback(request):
                         # area_id คือ Table id จาก table CodeInAreaDetail
                         # ค้นหาชื่อเขต
                         area_name = CodeInAreaDetail.objects.filter(id=area_id).first()
-                        all_station_in_this_area_manager = StationProfile.objects.filter(station_area_code=area_id).all()
-                        station_has_manager = UserListCodeType.objects.filter(userList_area_name=area_id,userList_position=1).first()
+                        
+                        
+                        
                         # print ('station_has_manager {} site take care {}'.format(station_has_manager.id, station_has_manager.userList_station_name.id))
                         # for i in all_station_in_this_area_manager :
                         #     # print ('station name {} station id {}'.format(i.station_name,i.id))
                         #     if i.id == station_has_manager.userList_station_name.id :
                         #         print ('find')
 
-                        flexmessages = FlexMessages().ShowStationListInArea(all_station_in_this_area_manager,station_has_manager,area_name)
+                        flexmessages = FlexMessages().ShowStationListInArea(area_name)
                         SendFlexMessages(payload).ReplyMessage(reply_token,flexmessages) 
                     elif 'CHANGE' in command :
                         print ('คำสั่งที่รับมาคือ CHANGE')
                         # แสดงเขตที่อยู่ในระบบทั้งหมด
                         # ค้นหาเจ้าของเขต เพื่อ filter ไม่ให้ส่งเขตตัวเองไปแสดง
-                        manager_in_area = UserListCodeType.objects.filter(userList_userid=user_id,userList_position=3).first()
-                        result=StationProfile.objects.filter(~Q(station_area_code=manager_in_area.userList_area_name.id)).values('station_area_code__code_in_area_code_name','station_area_code__id').annotate(entries=Count('id'))
-                        print ('result', result)
-                        # for i in all_area_in_this_system :
-                        #     print ('area name {} area code {}'.format(i.area_code_name,i.area_code_type))
-                        flexmessages = FlexMessages().ShowAreaListInStation(result)
+                        manager_in_area = UserListCodeType.objects.filter(userList_userid=user_id,userList_position=3,userList_activate=True).first()
+                        all_manager_in_system = AreaCodeType.objects.filter(area_register=True).all()
+                        all_station_count_with_area_name=StationProfile.objects.filter(~Q(station_area_code=manager_in_area.userList_area_name.id)).values('station_area_code__code_in_area_code_name','station_area_code__id').annotate(entries=Count('id'))
+                        # print ('result', result)
+                        for b in all_manager_in_system :
+                            print ('all_manager_in_area', b.area_code_name)
+                        for i in all_station_count_with_area_name :
+                            print ('AreaCode Detail {} '.format(i))
+                        flexmessages = FlexMessages().ShowAreaListInStation(all_station_count_with_area_name,all_manager_in_system)
                         SendFlexMessages(payload).ReplyMessage(reply_token,flexmessages)
                     elif 'SHOW' in command :
                         print ('คำสั่งที่รับมาคือ SHOW')
@@ -146,48 +150,92 @@ def callback(request):
 
                         data_command = 'DISPLAY-STATION-SHOW-ID'
                         data_station_command = 'CODE'
-                        manager_id = (command[command.index(data_command) + len(data_command): command.index('CODE'):])
-                        code_id = (command[command.index(data_station_command) + len(data_station_command): command.index('END'):])
-                        if manager_id == 'inwaiting' :
-                            # หมายถึงเขตนี้ ตำแหน่งผู้จัดการเขตว่างอยู่
-                            print ('คำสั่งที่รับมาคือ SHOW inwaiting')
-                            print ('ที่ตำแหน่ง Area ID {} พบว่า ไม่มีการ SET ผู้จัดการเขตไว้'.format(code_id))
-                            # ค้นหาสาขาที่อยู่ในเขตนี้ทั้งหมด
-                            area_station = StationProfile.objects.filter(station_area_code__id=code_id).all()
-                            station_has_manager = UserListCodeType.objects.filter(userList_userid=user_id,userList_position=3).first()
-                            # ค้นหา ID ของ สถานีที่ต้องจะย้าย
-                            area_id= CodeInAreaDetail.objects.filter(id=code_id).first()
-                            manager_detail = '5555'
+                        AreaCodeTypeManager_ID = (command[command.index(data_command) + len(data_command): command.index('CODE'):])
+                        CodeInAreaDetailCodeID = (command[command.index(data_station_command) + len(data_station_command): command.index('END'):])
+                        print ('*' * 150)
+                        print ('ส่วนของเขตทีปลายทางที่ต้องการเปลี่ยน AreaCodeTypeManager_ID {} CodeInAreaDetailCodeID {}'.format(AreaCodeTypeManager_ID,CodeInAreaDetailCodeID))
+                        UserListCodeType_Current_TM_Request = UserListCodeType.objects.filter(userList_userid=user_id,userList_position=3,userList_activate=True).first()
+                        Current_TM_Request_Name = UserListCodeType_Current_TM_Request
+                        Current_TM_Request_ID = UserListCodeType_Current_TM_Request.id
+                        Current_TM_Request_CodeInAreaDetail_ID = UserListCodeType_Current_TM_Request.userList_area_name.id
+                        Current_TM_Request_CodeInAreaDetail_Name = UserListCodeType_Current_TM_Request.userList_area_name.code_in_area_code_name
+                        print ('*' * 150)
+                        print ('ค้นหาชื่อผู้จัดการที่รับคำสั่งมาในตาราง UserListCodeTypeName {} UserListCodeTypeID {} CodeInAreaDetail_Name {} CodeInAreaDetail_ID {}'.format(Current_TM_Request_Name,
+                                                                                                        Current_TM_Request_ID,
+                                                                                                            Current_TM_Request_CodeInAreaDetail_Name,
+                                                                                                                Current_TM_Request_CodeInAreaDetail_ID))
+                        
+                        AreaCodeType_Current_TM_Request = AreaCodeType.objects.filter(area_code_type__id=Current_TM_Request_CodeInAreaDetail_ID).first()
+                        AreaCodeType_Current_TM_Request_Name = AreaCodeType_Current_TM_Request.area_code_name
+                        AreaCodeType_Current_TM_Request_ID = AreaCodeType_Current_TM_Request.id
+                        AreaCodeType_Current_TM_Request_CodeInAreaDetail_AreaCodeName = AreaCodeType_Current_TM_Request.area_code_type.code_in_area_code_name
+                        AreaCodeType_Current_TM_Request_CodeInAreaDetail_AreaCodeID = AreaCodeType_Current_TM_Request.area_code_type.id
+                        
+                        print ('ค้นหาชื่อผู้จัดการที่รับคำสั่งมาในตาราง AreaCodeTypeName {} AreaCodeTypeID {} CodeInAreaDetailAreaID {} CodeInAreaDetailName {}'.format(
+                                                                                                            AreaCodeType_Current_TM_Request_Name,
+                                                                                                                AreaCodeType_Current_TM_Request_ID,
+                                                                                                                AreaCodeType_Current_TM_Request_CodeInAreaDetail_AreaCodeName,
+                                                                                                                    AreaCodeType_Current_TM_Request_CodeInAreaDetail_AreaCodeID))
+                        print ('*' * 150)
+                        
+                        AreaCodeType__TM_Reques = AreaCodeType.objects.filter(area_code_type__id=CodeInAreaDetailCodeID).first()
+                        AreaCodeType_Current_TM_Request_Name = AreaCodeType_Current_TM_Request.area_code_name
+                        AreaCodeType_Current_TM_Request_ID = AreaCodeType_Current_TM_Request.id
+                        AreaCodeType_Current_TM_Request_CodeInAreaDetail_AreaCodeName = AreaCodeType_Current_TM_Request.area_code_type.code_in_area_code_name
+                        AreaCodeType_Current_TM_Request_CodeInAreaDetail_AreaCodeID = AreaCodeType_Current_TM_Request.area_code_type.id
+                        
+                        print ('ค้นหาข้อมูลเขตปลายทาง AreaCodeTypeName {} AreaCodeTypeID {} CodeInAreaDetailAreaID {} CodeInAreaDetailName {}'.format(
+                                                                                                            AreaCodeType_Current_TM_Request_Name,
+                                                                                                                AreaCodeType_Current_TM_Request_ID,
+                                                                                                                AreaCodeType_Current_TM_Request_CodeInAreaDetail_AreaCodeName,
+                                                                                                                    AreaCodeType_Current_TM_Request_CodeInAreaDetail_AreaCodeID))
+                        print ('*' * 150)
+                        # print ('ส่วนของการย้ายเขต ข้อมูลเขตเติิม เจ้าของเขต ชื่อ {} เจ้าของเขต ID {} ชือเขต {} เขต ID {}'.format(
+                        #                             AreaCodeType_Current_TM_Request.area_code_name,
+                        #                                 AreaCodeType_Current_TM_Request.area_code_type.id,
+                        #                                     AreaCodeType_Current_TM_Request.area_code_type.area_code_type.code_in_area_code_name))
+                        
+                        
+                        # if manager_id == 'inwaiting' :
+                        #     # หมายถึงเขตนี้ ตำแหน่งผู้จัดการเขตว่างอยู่
+                        #     print ('คำสั่งที่รับมาคือ SHOW inwaiting')
+                        #     print ('ที่ตำแหน่ง Area ID {} พบว่า ไม่มีการ SET ผู้จัดการเขตไว้'.format(code_id))
+                        #     # ค้นหาสาขาที่อยู่ในเขตนี้ทั้งหมด
+                        #     area_station = StationProfile.objects.filter(station_area_code__id=code_id).all()
+                        #     station_has_manager = UserListCodeType.objects.filter(userList_userid=user_id,userList_position=3).first()
+                        #     # ค้นหา ID ของ สถานีที่ต้องจะย้าย
+                        #     area_id= CodeInAreaDetail.objects.filter(id=code_id).first()
+                        #     manager_detail = '5555'
                             
-                            flexmessages = FlexMessages().ShowSiteInAreaNoManager(area_station,station_has_manager,manager_detail,area_id)
-                            SendFlexMessages(payload).ReplyMessage(reply_token,flexmessages)
-                        else : 
-                            print ('คำสั่งที่รับมาคือ SHOW')
+                        #     flexmessages = FlexMessages().ShowSiteInAreaNoManager(area_station,station_has_manager,manager_detail,area_id)
+                        #     SendFlexMessages(payload).ReplyMessage(reply_token,flexmessages)
+                        # else : 
+                        #     print ('คำสั่งที่รับมาคือ SHOW')
                             
-                            # area_show คือ table Id ของ AreaCodeType
-                            # ค้นหา area code ของ area_show
-                            area_code_id = AreaCodeType.objects.filter(id=manager_id).first()
-                            #ค้นหาข้อมูลสถานีทั้งหมดที่อยู่ในเขตที่ต้องการแสดง
-                            area_station = StationProfile.objects.filter(station_area_code__id=area_code_id.area_code_type.id).all()
-                            manager_detail = AreaCodeType.objects.filter(id=manager_id).first()
-                            station_has_manager = UserListCodeType.objects.filter(userList_userid=user_id,userList_position=3).first()
-                            if station_has_manager == None :
-                                print ('ไม่มีสถานีที่ดูแลอยู่ในเขตนี้')
-                                manager_detail_2 = AreaCodeType.objects.filter(id=manager_id).first()
-                                print ('manager_detail_2', manager_detail_2.area_code_name)
-                                # ค้นหาข้อมูลผู้จัดการเขต
-                                message = 'ไม่สามารถแสดงข้อมูลในเขต {} ได้ อาจจะเนื่องด้วย ผู้จัดการเขตคุณ {} ยังไม่ได้ทำการลงทะเบียน Line Bot'.format(manager_detail.area_code_type,manager_detail.area_code_name)
-                                line_bot_api.reply_message(reply_token, TextSendMessage(text=message))
-                                # flexmessages = FlexMessages().ShowSiteInArea(area_station,station_has_manager,manager_detail)
-                                # SendFlexMessages(payload).ReplyMessage(reply_token,flexmessages)
+                        #     # area_show คือ table Id ของ AreaCodeType
+                        #     # ค้นหา area code ของ area_show
+                        #     area_code_id = AreaCodeType.objects.filter(id=manager_id).first()
+                        #     #ค้นหาข้อมูลสถานีทั้งหมดที่อยู่ในเขตที่ต้องการแสดง
+                        #     area_station = StationProfile.objects.filter(station_area_code__id=area_code_id.area_code_type.id).all()
+                        #     manager_detail = AreaCodeType.objects.filter(id=manager_id).first()
+                        #     station_has_manager = UserListCodeType.objects.filter(userList_userid=user_id,userList_position=3).first()
+                        #     if station_has_manager == None :
+                        #         print ('ไม่มีสถานีที่ดูแลอยู่ในเขตนี้')
+                        #         manager_detail_2 = AreaCodeType.objects.filter(id=manager_id).first()
+                        #         print ('manager_detail_2', manager_detail_2.area_code_name)
+                        #         # ค้นหาข้อมูลผู้จัดการเขต
+                        #         message = 'ไม่สามารถแสดงข้อมูลในเขต {} ได้ อาจจะเนื่องด้วย ผู้จัดการเขตคุณ {} ยังไม่ได้ทำการลงทะเบียน Line Bot'.format(manager_detail.area_code_type,manager_detail.area_code_name)
+                        #         line_bot_api.reply_message(reply_token, TextSendMessage(text=message))
+                        #         # flexmessages = FlexMessages().ShowSiteInArea(area_station,station_has_manager,manager_detail)
+                        #         # SendFlexMessages(payload).ReplyMessage(reply_token,flexmessages)
                                 
-                            else :
-                                print ('station_has_manager {} '.format(station_has_manager))
-                                print ('station_has_manager {}'.format(station_has_manager.id))
-                                for i in area_station :
-                                    print ('station name {} station id {}'.format(i.station_name,i.id))
-                                flexmessages = FlexMessages().ShowSiteInArea(area_station,station_has_manager,manager_detail)
-                                SendFlexMessages(payload).ReplyMessage(reply_token,flexmessages)
+                        #     else :
+                        #         print ('station_has_manager {} '.format(station_has_manager))
+                        #         print ('station_has_manager {}'.format(station_has_manager.id))
+                        #         for i in area_station :
+                        #             print ('station name {} station id {}'.format(i.station_name,i.id))
+                        #         flexmessages = FlexMessages().ShowSiteInArea(area_station,station_has_manager,manager_detail)
+                        #         SendFlexMessages(payload).ReplyMessage(reply_token,flexmessages)
                 elif 'MAIN-AREA-REGISTER-PROCESS' in command :
                     print ('กรณีที่มีการลงทะเบียนสมาชิก')
                     if 'SELECTER' in command:

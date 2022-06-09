@@ -1,4 +1,5 @@
-from asyncio.windows_events import NULL
+# from asyncio.windows_events import NULL
+
 from turtle import position
 from urllib import request
 from django.utils import timezone

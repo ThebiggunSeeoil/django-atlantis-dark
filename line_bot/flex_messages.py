@@ -188,6 +188,40 @@ class FlexMessages :
         ]
       },
       {
+        "type": "box",
+        "layout": "horizontal",
+        "margin": "lg",
+        "contents": [
+          {
+            "type": "text",
+            "text": "การตั้งค่า",
+            "weight": "bold",
+            "size": "md",
+            "flex": 2,
+            "align": "start",
+            "gravity": "center",
+            "margin": "sm",
+            "contents": []
+          },
+          {
+            "type": "text",
+            "text": "เลือก",
+            "weight": "bold",
+            "size": "md",
+            "color": "#FA4204FF",
+            "align": "end",
+            "gravity": "center",
+            "margin": "sm",
+            "action": {
+              "type": "postback",
+              "text": "ข้อความระบบ : กำลังจัดส่งข้อมูล SMB ",
+              "data": "SETTING"
+            },
+            "contents": []
+          }
+        ]
+      },
+      {
         "type": "separator",
         "margin": "lg"
       }
@@ -1182,6 +1216,211 @@ class FlexMessages :
                 "contents": centent
                               }
       return data
+    def ShowSiteInAreaNew(self,area_station,station_has_manager,manager_detail):
+          # station_has_manager คือ ข้อมูลเขต ของ user_id ที่เรียกรายงาน
+      # manager_detail คือ ข้อมูลเขต ที่โดนเรียกใช้ เพื่อขอดูข้อมูลสาขาที่อยู่ในเขตนี้
+      print ('ข้อมูลเขต ID ของผู้จัดการที่ต้องการดูข้อมูลสาขา คือ ID {} ::::::: ข้อมูลเขต ID ของผู้จัดการเขตที่เรียกรายงาน {}'.format(manager_detail.id,station_has_manager.userList_area_name.id))
+      if manager_detail.id == station_has_manager.userList_area_name.id :
+        print ('OKKKKKK')
+        label =  "เขตปัจจุบันของคุณ"
+        text =  "ข้อความระบบ : เขตปัจจุบันของคุุณ ไม่สามารถย้ายเขตได้ กรุณาเลือกเขตใหม่"
+        data =  "None"
+      else :
+        label =  "ย้ายเขตมานี้ กดที่นี้"
+        text =  "ข้อความระบบ : รอสักครู่ กำลังจัดส่งตัวเลือก "
+        data =  "AREA-REGISTER-PROCESS-CHANGE_AREA-CURRENTAREAID{}NEWAREAID{}END".format(station_has_manager.userList_area_name.id,manager_detail.id)
+      
+      # ค้นหาชื่อผู้จัดการเขต
+      arae_name = AreaCodeType.objects.filter(area_code_type__id=station_has_manager.userList_area_name.id).first()
+      #station_has_manager.userList_area_name.code_in_area_code_name
+      centent = {
+                  "type": "bubble",
+                  "direction": "ltr",
+                  "hero": {
+                    "type": "image",
+                    "url": "https://www.susco.co.th/images/logo_susco.png",
+                    "margin": "none",
+                    "align": "start",
+                    "gravity": "center",
+                    "size": "full",
+                    "aspectRatio": "22:6",
+                    "aspectMode": "fit",
+                    "backgroundColor": "#F2EC3EFF",
+                    "action": {
+                      "type": "uri",
+                      "label": "SUSCO",
+                      "uri": "https://www.susco.co.th/index.asp"
+                    }
+                  },
+                  "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                      {
+                        "type": "text",
+                        "text": "เขต " + manager_detail.area_code_type.code_in_area_code_name,
+                        "weight": "bold",
+                        "size": "lg",
+                        "align": "center",
+                        "contents": []
+                      },
+                      {
+                        "type": "text",
+                        "text": "ผู้จัดการเขต",
+                        "weight": "bold",
+                        "size": "md",
+                        "align": "center",
+                        "contents": []
+                      },
+                      {
+                        "type": "text",
+                        "text": manager_detail.area_code_name,
+                        "weight": "bold",
+                        "size": "md",
+                        "align": "center",
+                        "contents": []
+                      },
+                      {
+                        "type": "separator",
+                        "margin": "lg"
+                      },
+                      {
+                        "type": "box",
+                        "layout": "horizontal",
+                        "margin": "lg",
+                        "contents": [
+                          {
+                            "type": "text",
+                            "text": "ชื่อสาขา",
+                            "weight": "bold",
+                            "size": "sm",
+                            "flex": 1,
+                            "align": "center",
+                            "gravity": "center",
+                            "margin": "sm",
+                            "contents": []
+                          }
+                          
+                        ]
+                      },
+                      #ข้อมูลสาขา
+                      
+                      
+                      {
+                        "type": "separator",
+                        "margin": "lg"
+                      }
+                    ]
+                  },
+                  "footer": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "flex": 0,
+                    "spacing": "sm",
+                    "contents": [
+                      {
+                        "type": "text",
+                        "text": "รายชื่อในเขตดูแล",
+                        "weight": "bold",
+                        "size": "lg",
+                        "color": "#AA1C1CFF",
+                        "align": "center",
+                        "gravity": "top",
+                        "wrap": True,
+                        "contents": []
+                      },
+                      
+                      {
+                        "type": "separator"
+                      },
+                      {
+                        "type": "text",
+                        "text": "ข้อมูลเขตปัจจุบัน",
+                        "weight": "bold",
+                        "size": "md",
+                        "align": "center",
+                        "wrap": True,
+                        "contents": []
+                      },
+                      {
+                        "type": "text",
+                        "text": "เขต " + station_has_manager.userList_area_name.code_in_area_code_name,
+                        "weight": "bold",
+                        "size": "md",
+                        "align": "center",
+                        "wrap": True,
+                        "contents": []
+                      },
+                      {
+                        "type": "text",
+                        "text": "ผู้จัดการเขต",
+                        "weight": "bold",
+                        "size": "md",
+                        "align": "center",
+                        "wrap": True,
+                        "contents": []
+                      },
+                      {
+                        "type": "text",
+                        "text": arae_name.area_code_name,
+                        "weight": "bold",
+                        "size": "md",
+                        "align": "center",
+                        "wrap": True,
+                        "contents": []
+                      },
+                      {
+                        "type": "button",
+                        "action": {
+                          "type": "postback",
+                          "label": label,
+                          "text": text,
+                          "data": data
+                        },
+                        "color": "#12AA3DFF",
+                        "margin": "md",
+                        "height": "sm"
+                      }
+                    ]
+                  }
+                }
+      
+      for i in area_station :
+        if i.id == station_has_manager.id :
+          manager_register = 'OK'
+          color = '#0C7537FF'
+          post_back = 'DISPLAY-STATION-BRANCH-ID{}'.format(station_has_manager.id)
+        else : 
+          manager_register = 'NOK'
+          color = '#FF0000'
+          post_back = 'NONE'
+        station = {
+                          "type": "box",
+                          "layout": "horizontal",
+                          "margin": "lg",
+                          "contents": [
+                            {
+                              "type": "text",
+                              "text": "{}".format(i.station_name),
+                              "weight": "bold",
+                              "size": "xs",
+                              "flex": 5,
+                              "align": "start",
+                              "gravity": "center",
+                              "margin": "sm",
+                              "contents": []
+                            }
+
+                            
+                          ]
+                        }
+        centent['body']['contents'].insert(-1,station)
+      data = {
+                "type": "flex",
+                "altText": 'message',
+                "contents": centent
+                              }
+      return data
     def ShowSiteInAreaNoManager(self,area_station,station_has_manager,manager_detail,area_id):
       # station_has_manager คือ ข้อมูลเขต ของ user_id ที่เรียกรายงาน
       # manager_detail คือ ข้อมูลเขต ที่โดนเรียกใช้ เพื่อขอดูข้อมูลสาขาที่อยู่ในเขตนี้
@@ -1387,7 +1626,8 @@ class FlexMessages :
                 "contents": centent
                               }
       return data
-    def ShowAreaListInStation(self,result):
+    def ShowAreaListInStation(self,all_station_count_with_area_name,all_manager_in_system):
+      
       centent = {
                       "type": "bubble",
                       "direction": "ltr",
@@ -1456,11 +1696,11 @@ class FlexMessages :
                                 "align": "end",
                                 "gravity": "center",
                                 "margin": "sm",
-                                "action": {
-                                  "type": "postback",
-                                  "text": "ข้อความระบบ : กำลังจัดส่งตัวเลือกข้อมูลสาขา",
-                                  "data": "AREA-SMB-SITE5001"
-                                },
+                                # "action": {
+                                #   "type": "postback",
+                                #   "text": "ข้อความระบบ : กำลังจัดส่งตัวเลือกข้อมูลสาขา",
+                                #   "data": "AREA-SMB-SITE5001"
+                                # },
                                 "contents": []
                               }
                             ]
@@ -1503,7 +1743,7 @@ class FlexMessages :
                         ]
                       }
                     }
-      for area in result :
+      for area in all_station_count_with_area_name :
         # print (area)
         # ค้นหา id ของผู้จัดการเขต
         # print ('station_area_code__id ',area['station_area_code__id'])
@@ -1576,7 +1816,20 @@ class FlexMessages :
                               }
       return data
     
-    def ShowStationListInArea(self,all_station_in_this_area_manager,station_has_manager,area_name):
+    def ShowStationListInArea(self,area_id):
+      # Check Station TM in Inwaiting or not 
+      TM_Status_Last = area_id.area_code_type.id
+      # if TM_Status_Last != 17 : #inwaiting
+      
+
+
+      
+        
+      
+      all_station_in_this_area_manager = StationProfile.objects.filter(station_area_code=area_id).all()
+      station_has_manager = UserListCodeType.objects.filter(userList_area_name=area_id,userList_position=1).first()
+      
+      
       centent = {
                               "type": "bubble",
                               "direction": "ltr",
